@@ -1,0 +1,5 @@
+{
+    "terminal.integrated.tabs.enabled": false,
+    "jupyter.searchForJupyter": false,
+    "jupyter.jupyterServerType": "local",
+}
