@@ -28,18 +28,28 @@ def random_perspective_placing(fg, bg):
     BGCent = createTransform(x=bw/2+bx, y=bh/2+by)
     perspective_trans = BGCent@S@P@T@AS@DocCent
 
-    return cv2.warpPerspective(fg, perspective_trans, (bw, bh), bg, borderMode=cv2.BORDER_TRANSPARENT) 
+    sample = cv2.warpPerspective(fg, perspective_trans, (bw, bh), bg, borderMode=cv2.BORDER_TRANSPARENT) 
+    
+    black = np.zeros((bh, bw))
+    pts = np.array([[0,0,1], [w,0,1], [w,h,1], [0,h,1]]).T
+    pts = perspective_trans @ pts
+    pts = np.int32(pts.T)[:,:2]
+    ground_truth = cv2.polylines(black, [pts], isClosed=True, color=(1,1,1), thickness=2)
 
-
+    return sample, ground_truth
 
 
 while(1):
     docName = np.floor(rand()*14)
     doc = cv2.imread('./raw_dataset/docs/{name:.0f}.jpg'.format(name=docName))
     bg = cv2.imread('./raw_dataset/0.jpg')
-    result = random_perspective_placing(doc, bg)
-    result = cv2.resize(result, None, fx=0.5, fy=0.5)
-    cv2.imshow('0', result)
+    sample, ground_truth = random_perspective_placing(doc, bg)
+
+    sample = cv2.resize(sample, None, fx=0.5, fy=0.5)
+    ground_truth = cv2.resize(ground_truth, None, fx=0.5, fy=0.5)
+
+    cv2.imshow('0', sample)
+    cv2.imshow('1', ground_truth)
     key = cv2.waitKey(100)
     if key != -1 and key != 255:
         break
