@@ -33,7 +33,8 @@ def random_perspective_placing(fg, bg):
     black = np.zeros((bh, bw))
     pts = np.array([[0,0,1], [w,0,1], [w,h,1], [0,h,1]]).T
     pts = perspective_trans @ pts
-    pts = np.int32(pts.T)[:,:2]
+    pts = pts[:2, :] / pts[2, :]
+    pts = np.int32(pts.T)
     ground_truth = cv2.polylines(black, [pts], isClosed=True, color=(1,1,1), thickness=2)
 
     return sample, ground_truth
