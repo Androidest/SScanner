@@ -14,9 +14,9 @@ def random_perspective_placing(fg, bg):
     bh, bw, _ = bg.shape
     h, w, _ = fg.shape
     dx, dy = np.random.normal(0, 2/3, size=2)
-    p1, p2 = np.random.normal(0, 0.4/3, size=2)
+    p1, p2 = np.random.normal(0, 0.42/3, size=2)
     a = np.random.rand()*360
-    s = np.random.normal(0.25, 0.2/3)
+    s = np.random.normal(0.26, 0.2 /3)
     bx = np.random.normal(0, bw/3*0.2)
     by = np.random.normal(0, bh/3*0.2)
 
@@ -51,9 +51,10 @@ def random_cut(img, w, h):
 w, h = 1080, 1080
 
 while(1):
-    docName = np.floor(rand()*14)
+    docName = np.floor(rand()*5)+21
+    bgName = np.floor(rand()*397)
     doc = cv2.imread('./raw_dataset/docs/{name:.0f}.jpg'.format(name=docName))
-    bg = cv2.imread('./raw_dataset/0.jpg')
+    bg = cv2.imread('./raw_dataset/backgrounds/{name:.0f}.jpg'.format(name=bgName))
     bg = random_cut(bg, w, h)
     sample, ground_truth = random_perspective_placing(doc, bg)
 

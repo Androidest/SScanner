@@ -2,19 +2,23 @@
 import cv2
 
 def extract(frame_skip):
-    for i in range(0,8):
-        print(i)
+    name = 397
+    for i in range(13,13):
+        
         video = cv2.VideoCapture("./raw_dataset/bg_videos/{name}.mp4".format(name=i))   
         count = 0 
+    
         while(video.isOpened()):
             count += frame_skip
-    
+
             ret, frame = video.read()
             if ret==True:
                 video.set(1, count)
                 h, w, _ = frame.shape
                 if h > w:
                     frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
+                cv2.imwrite("./raw_dataset/backgrounds/{name}.jpg".format(name=name), frame)
+ 
                 frame = cv2.resize(frame, None, fx=0.3, fy=0.3)
                 cv2.imshow('bg', frame)
             else:
@@ -27,4 +31,9 @@ def extract(frame_skip):
                 cv2.destroyAllWindows()
                 return
 
-extract(frame_skip = 30)
+            name += 1
+
+    video.release()
+    cv2.destroyAllWindows()
+
+extract(frame_skip = 20)
