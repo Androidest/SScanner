@@ -39,11 +39,20 @@ def random_perspective_placing(fg, bg):
 
     return sample, ground_truth
 
+def random_cut(img, w, h):
+    ih, iw, _ = bg.shape
+    r1 = int(rand() * (ih-h))
+    r2 = r1 + h
+    c1 = int(rand() * (iw-w))
+    c2 = c1 + w
+    return img[r1:r2, c1:c2]
 
 while(1):
     docName = np.floor(rand()*14)
+    w, h = 1080, 1080
     doc = cv2.imread('./raw_dataset/docs/{name:.0f}.jpg'.format(name=docName))
     bg = cv2.imread('./raw_dataset/0.jpg')
+    bg = random_cut(bg, w, h)
     sample, ground_truth = random_perspective_placing(doc, bg)
 
     sample = cv2.resize(sample, None, fx=0.5, fy=0.5)
