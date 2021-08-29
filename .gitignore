@@ -9,3 +9,4 @@
 # production
 /build
 **/bg_videos
+**/dataset

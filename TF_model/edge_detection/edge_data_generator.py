@@ -34,9 +34,9 @@ def random_perspective_placing(fg, bg):
     pts = perspective_trans @ pts
     pts = pts[:2, :] / pts[2, :]
     pts = np.int32(pts.T)
-    output = cv2.polylines(black, [pts], isClosed=True, color=(1,1,1), thickness=2)
+    output = cv2.polylines(black, [pts], isClosed=True, color=255, thickness=2)
 
-    return input, output
+    return input, output.astype(np.uint8)
 
 def random_cut(img, w, h):
     ih, iw, _ = img.shape
@@ -54,15 +54,40 @@ def generate_edge_data(w, h):
     bg = random_cut(bg, w, h)
     return random_perspective_placing(doc, bg)
 
-w, h = 1080, 1080 
-while(1):
-    input, output = generate_edge_data(w, h)
-    cv2.imshow('input', input)
-    cv2.imshow('output', output)
+def test():
+    w, h = 1080, 1080 
+    while(1):
+        input, output = generate_edge_data(w, h)
+        cv2.imshow('input', input)
+        cv2.imshow('output', output)
 
-    key = cv2.waitKey(10)
-    if key != -1 and key != 255:
-        break
-cv2.destroyAllWindows()
+        key = cv2.waitKey(10)
+        if key != -1 and key != 255:
+            break
+    cv2.destroyAllWindows()
 
-# %%
+def read_dataset():
+    for i in range(10000):
+        x = cv2.imread("./dataset/x/{i}.jpg".format(i=i))
+        y = cv2.imread("./dataset/y/{i}.jpg".format(i=i))
+        cv2.imshow('input', x)
+        cv2.imshow('output', y)
+
+        key = cv2.waitKey(500)
+        if key != -1 and key != 255:
+            break
+    cv2.destroyAllWindows()
+
+def generate(w, h, numb): 
+    for i in range(numb):
+        input, output = generate_edge_data(w, h)
+        cv2.imwrite("./dataset/x/{i}.jpg".format(i=i), input)
+        cv2.imwrite("./dataset/y/{i}.jpg".format(i=i), output)
+
+        key = cv2.waitKey(100)
+        if key != -1 and key != 255:
+            cv2.destroyAllWindows()
+            return
+    
+# generate(w=512, h=512, numb=10000)
+read_dataset()
