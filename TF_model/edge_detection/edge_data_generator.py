@@ -54,8 +54,7 @@ def generate_edge_data(w, h):
     bg = random_cut(bg, w, h)
     return random_perspective_placing(doc, bg)
 
-def test():
-    w, h = 1080, 1080 
+def test(w, h):
     while(1):
         input, output = generate_edge_data(w, h)
         cv2.imshow('input', input)
@@ -66,8 +65,8 @@ def test():
             break
     cv2.destroyAllWindows()
 
-def read_dataset():
-    for i in range(10000):
+def read_dataset(numb):
+    for i in range(numb):
         x = cv2.imread("./dataset/x/{i}.jpg".format(i=i))
         y = cv2.imread("./dataset/y/{i}.jpg".format(i=i))
         cv2.imshow('input', x)
@@ -78,16 +77,18 @@ def read_dataset():
             break
     cv2.destroyAllWindows()
 
-def generate(w, h, numb): 
-    for i in range(numb):
+def generate(w, h, start, numb): 
+    for i in range(start, start+numb):
         input, output = generate_edge_data(w, h)
         cv2.imwrite("./dataset/x/{i}.jpg".format(i=i), input)
         cv2.imwrite("./dataset/y/{i}.jpg".format(i=i), output)
 
-        key = cv2.waitKey(100)
+        print('Generating Images: {i}.jpg'.format(i=i))
+        key = cv2.waitKey(1)
         if key != -1 and key != 255:
             cv2.destroyAllWindows()
             return
+    print('finished')
     
-# generate(w=512, h=512, numb=10000)
-read_dataset()
+# generate(w=512, h=512, start=3000, numb=1)
+# read_dataset(numb=3000)
