@@ -1,37 +1,7 @@
 # %%
-import cv2
-import numpy as np
+import import_ipynb
 import tensorflow as tf
-
-
-def loadData(split_rate=0.8):
-    def parse_files(x_fname, y_fname):
-        image_string = tf.io.read_file(x_fname)
-        image_decoded = tf.image.decode_jpeg(image_string, channels=3)
-        x = tf.cast(image_decoded, tf.float32) / 127.5 - 1
-
-        image_string = tf.io.read_file(y_fname)
-        image_decoded = tf.image.decode_jpeg(image_string, channels=1)
-        y = tf.cast(image_decoded, tf.float32) / 255.0
-
-        return x, y
-
-    x = tf.data.Dataset.list_files('./dataset/x/*.jpg', shuffle=False)
-    x = list(x.as_numpy_iterator())
-
-    y = tf.data.Dataset.list_files('./dataset/y/*.jpg', shuffle=False)
-    y = list(y.as_numpy_iterator())
-
-    ds = tf.data.Dataset.from_tensor_slices((x, y))
-    ds = ds.shuffle(buffer_size=len(x), seed=123).map(parse_files)
-    # ds = ds.prefetch(buffer_size=8)
-    print('data size: ' + str(len(x)))
-
-    spliter = int(len(x) * split_rate)
-    ds_train = ds.take(spliter)
-    ds_test = ds.skip(spliter)
-    return ds_train, ds_test
-
+from edge_data_generator import loadData
 
 def create_model():
     base_model = tf.keras.applications.mobilenet_v2.MobileNetV2(
@@ -40,14 +10,14 @@ def create_model():
     base_model.summary()
 
     input = base_model.input
-    hx = base_model.layers[56].output  # VGG:9, MobilenetV2:26
-    output = tf.keras.layers.Conv2DTranspose(
-        filters=1, kernel_size=8*2, strides=8, padding='same')(hx)
+    hx = base_model.layers[26].output  # VGG:9, MobilenetV2:26,56
+    hx = tf.keras.layers.Conv2D(filters=1, kernel_size=1)(hx)
+    output = tf.keras.layers.Conv2DTranspose( filters=1, kernel_size=4*2, strides=4, padding='same')(hx)
 
     model = tf.keras.Model(inputs=input, outputs=output)
     model.summary()
 
-    opt_fn = tf.keras.optimizers.Adam(0.01)
+    opt_fn = tf.keras.optimizers.Adam(0.001)
     loss_fn = tf.keras.losses.BinaryCrossentropy(from_logits=True)
 
     model.compile(optimizer=opt_fn, loss=loss_fn)
@@ -74,44 +44,46 @@ def train_model(model, ds_train, ds_test=None, initial_epoch=0, epochs=50, batch
         print('start training ...')
 
 
-ds_train, _ = loadData(split_rate=0.5)
+ds_train, _ = loadData(split_rate=0.2)
 model = create_model()
 model.trainable = False
-train_model(model, ds_train, initial_epoch=0, epochs=4, batchSize=16)
+train_model(model, ds_train, initial_epoch=0, epochs=5, batchSize=16)
 model.trainable = True
-train_model(model, ds_train, initial_epoch=0, epochs=10, batchSize=16)
+train_model(model, ds_train, initial_epoch=0, epochs=15, batchSize=16)
 
 
 # %%
-# image_string = tf.io.read_file('./dataset/x/3000.jpg')
-image_string = tf.io.read_file('./a.jpg')
+import numpy as np
+import matplotlib.pyplot as plt
+
+# image_string = tf.io.read_file('./dataset/x/0.jpg')
+image_string = tf.io.read_file('./raw_dataset/test.jpg')
 image_decoded = tf.image.decode_jpeg(image_string, channels=3)
 test = tf.image.resize(image_decoded, (1080, 1080), preserve_aspect_ratio=True)
 test = tf.cast(test, tf.float32) / 127.5 - 1
 test = tf.reshape(test, (1)+test.shape)
 p = model.predict(test)[0, :, :, :]
-# min, max = np.min(p), np.max(p)
-# p = (p-min) / (max-min)
 p = p > 0.5
 img = p  * 255
-cv2.imwrite("./result.jpg", img)
+plt.figure(figsize = (9,12))
+plt.imshow(img, cmap='gray')
 
 np.max(img)
 
 # %%
 import tensorflow as tf
-filePath = './Models/edge_detector_MobileNetV2.h5'
+filePath = './Models/edge_detector_MobileNetV1.h5'
 model.save(filePath, overwrite=True, include_optimizer=False)
 
 # %%
 import tensorflow as tf
-filePath = './Models/edge_detector_MobileNetV2.h5'
+filePath = './Models/edge_detector_MobileNetV1.h5'
 model = tf.keras.models.load_model(filePath)
 
 
 # %%
 import tensorflow as tf
-base_model = tf.keras.applications.mobilenet_v2.MobileNetV2(
+base_model = tf.keras.applications.mobilenet.MobileNet(
         include_top=False, input_shape=(512, 512, 3))
 count =0
 for l in base_model.layers:

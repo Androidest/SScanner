@@ -1,5 +1,6 @@
 {
-    "terminal.integrated.tabs.enabled": true,
+    "terminal.integrated.tabs.enabled": false,
     "jupyter.searchForJupyter": false,
     "jupyter.jupyterServerType": "local",
+    "python.analysis.extraPaths": ["./TF_model/edge_detection"]
 }
