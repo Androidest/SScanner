@@ -5,7 +5,7 @@ def extract(frame_skip):
     name = 397
     for i in range(13,13):
         
-        video = cv2.VideoCapture("./raw_dataset/bg_videos/{name}.mp4".format(name=i))   
+        video = cv2.VideoCapture("./bg_videos/{name}.mp4".format(name=i))   
         count = 0 
     
         while(video.isOpened()):
@@ -17,7 +17,7 @@ def extract(frame_skip):
                 h, w, _ = frame.shape
                 if h > w:
                     frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
-                cv2.imwrite("./raw_dataset/backgrounds/{name}.jpg".format(name=name), frame)
+                cv2.imwrite("./backgrounds/{name}.jpg".format(name=name), frame)
  
                 frame = cv2.resize(frame, None, fx=0.3, fy=0.3)
                 cv2.imshow('bg', frame)
