@@ -2,7 +2,6 @@
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
-from tensorflow.keras.layers import Resizing
 
 def class_balanced_sigmoid_cross_entropy(logits, label):
     y = tf.cast(label, tf.float32)
@@ -14,6 +13,20 @@ def class_balanced_sigmoid_cross_entropy(logits, label):
     pos_weight = beta / (1 - beta)
     cost = tf.nn.weighted_cross_entropy_with_logits(logits, y, pos_weight)
     cost = tf.reduce_mean(cost * (1 - beta))
+
+    return cost
+
+def bce_neg_percent(logits, label):
+    y = tf.cast(label, tf.float32)
+
+    count_neg = tf.reduce_sum(1. - logits) # the number of 0 in y
+    b, h, w, _ = logits.shape
+    if b == None:
+        b, h, w = 16, 512, 512 
+    neg_percent = count_neg / (b*h*w)
+
+    cost = tf.keras.losses.BinaryCrossentropy(from_logits=True)(logits, y)
+    cost = tf.reduce_mean(cost) + neg_percent
 
     return cost
 
@@ -44,19 +57,19 @@ def predict_test(filename, maxSize=1080):
 def compile_model(input, output, lr):
     model = tf.keras.Model(inputs=input, outputs=output)
     opt_fn = tf.keras.optimizers.Adam(lr)
-    loss_fn = tf.keras.losses.BinaryCrossentropy(from_logits=True)
-    # loss_fn = class_balanced_sigmoid_cross_entropy
+    # loss_fn = tf.keras.losses.BinaryCrossentropy(from_logits=True)
+    loss_fn = bce_neg_percent
     model.compile(optimizer=opt_fn, loss=loss_fn)
     return model
 
-def create_model(lr=0.001):
+def create_model(layer_index, lr=0.001):
     base_model = tf.keras.applications.mobilenet_v2.MobileNetV2( 
         include_top=False, input_shape=(None, None, 3)) #TODO
     base_model.trainable = False # works only before compiling
 
     input = base_model.input
 
-    hx = base_model.layers[26].output  # VGG:9, MobilenetV2:26,56
+    hx = base_model.layers[layer_index].output  # VGG:9, MobilenetV2:26,56
     hx = tf.keras.layers.Resizing(512, 512, interpolation='nearest')(hx)
     hx = tf.keras.layers.Conv2D(filters=1, kernel_size=1, padding='same')(hx)
     hx = tf.keras.layers.Conv2D(filters=1, kernel_size=3, padding='same')(hx)
@@ -68,7 +81,7 @@ def create_model(lr=0.001):
     return model
 
 def insert_upConv(model, layer_index, lr=0.01):
-    model.trainable = False # works only before compiling
+    # model.trainable = False # works only before compiling
     old_fused = model.layers[-1].input
 
     hx = model.layers[layer_index].output  # VGG:9, MobilenetV2:26,56
@@ -83,7 +96,7 @@ def insert_upConv(model, layer_index, lr=0.01):
     new_model = compile_model(model.input, output, lr)
     return new_model
 
-
+showBaseSummary()
 
 # %%
 import import_ipynb
@@ -92,9 +105,9 @@ from edge_data_generator import loadData, generate
 # generate(w=512, h=512, start=0, numb=3000)
 
 ds_train, _ = loadData(split_rate=1)
-model = create_model(lr=0.001)
-model = insert_upConv(model, layer_index=8, lr=0.001)
-train_model(model, ds_train, initial_epoch=0, epochs=20, batchSize=16)
+model = create_model(layer_index=29, lr=0.001)
+model = insert_upConv(model, layer_index=11, lr=0.001)
+train_model(model, ds_train, initial_epoch=0, epochs=20, batchSize=4)
 # model.trainable = True
 # train_model(model, ds_train, initial_epoch=0, epochs=5, batchSize=16)
 
