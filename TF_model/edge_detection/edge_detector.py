@@ -19,14 +19,11 @@ def class_balanced_sigmoid_cross_entropy(logits, label):
 def bce_neg_percent(logits, label):
     y = tf.cast(label, tf.float32)
 
-    count_neg = tf.reduce_sum(1. - logits) # the number of 0 in y
-    b, h, w, _ = logits.shape
-    if b == None:
-        b, h, w = 16, 512, 512 
-    neg_percent = count_neg / (b*h*w)
+    p_count = tf.reduce_sum(tf.nn.sigmoid(logits), axis=(1,2,3)) # the number of 1 in y
+    y_count = tf.reduce_sum(y, axis=(1,2,3))
 
     cost = tf.keras.losses.BinaryCrossentropy(from_logits=True)(logits, y)
-    cost = tf.reduce_mean(cost) + neg_percent
+    cost = tf.reduce_mean(cost + (p_count - y_count)**2) 
 
     return cost
 
@@ -96,7 +93,7 @@ def insert_upConv(model, layer_index, lr=0.01):
     new_model = compile_model(model.input, output, lr)
     return new_model
 
-showBaseSummary()
+# showBaseSummary()
 
 # %%
 import import_ipynb
