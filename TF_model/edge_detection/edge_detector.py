@@ -77,7 +77,7 @@ def create_model(base, layer_index, scale, lr=0.001):
     model = compile_model(input, output, lr)
     return model
 
-def insert_upConv(model, layer_index, scale, lr=0.001):
+def insert_upsampling(model, layer_index, scale, lr=0.001):
     model.trainable = False # works only before compiling
 
     old_fused = model.layers[-1].input
@@ -117,11 +117,11 @@ ds_train = ds_train.prefetch(buffer_size=8)
 # ===== VGG16 : too heavy for browser =========
     # model = create_model(base=VGG16, layer_index=13, lr=0.001)
     # train_model(model, ds_train, epochs=2, batchSize=32)
-    # model = insert_upConv(model, layer_index=9, lr=0.001)
+    # model = insert_upsampling(model, layer_index=9, lr=0.001)
     # train_model(model, ds_train, epochs=2, batchSize=32)
-    # model = insert_upConv(model, layer_index=5, lr=0.001)
+    # model = insert_upsampling(model, layer_index=5, lr=0.001)
     # train_model(model, ds_train, epochs=2, batchSize=32)
-    # model = insert_upConv(model, layer_index=2, lr=0.001)
+    # model = insert_upsampling(model, layer_index=2, lr=0.001)
     # train_model(model, ds_train, epochs=3, batchSize=32)
     # model = fine_tune(model, lr=0.0001)
     # train_model(model, ds_train, epochs=7, batchSize=32)
@@ -130,11 +130,11 @@ ds_train = ds_train.prefetch(buffer_size=8)
 # ===== Mobilenet V1 ======
 # model = create_model(base=MobileNet, layer_index=72, scale=16, lr=0.001)
 # train_model(model, ds_train, epochs=2, batchSize=8)
-# model = insert_upConv(model, layer_index=35, scale=8, lr=0.001)
+# model = insert_upsampling(model, layer_index=35, scale=8, lr=0.001)
 # train_model(model, ds_train, epochs=3, batchSize=8)
-# model = insert_upConv(model, layer_index=22, scale=4, lr=0.001)
+# model = insert_upsampling(model, layer_index=22, scale=4, lr=0.001)
 # train_model(model, ds_train, epochs=3, batchSize=8)
-# model = insert_upConv(model, layer_index=9, scale=2, lr=0.001)
+# model = insert_upsampling(model, layer_index=9, scale=2, lr=0.001)
 # train_model(model, ds_train, epochs=4, batchSize=8)
 # ds_train, _ = loadData(split_rate=1)
 # ds_train = ds_train.prefetch(buffer_size=32)
@@ -144,7 +144,7 @@ ds_train = ds_train.prefetch(buffer_size=8)
 # ====== Mobilenet V2 Small ======
 model = create_model(base=MobileNetV2, layer_index=26, scale=4, lr=0.001) 
 train_model(model, ds_train, epochs=3, batchSize=8)
-model = insert_upConv(model, layer_index=8, scale=2, lr=0.001)
+model = insert_upsampling(model, layer_index=8, scale=2, lr=0.001)
 train_model(model, ds_train, epochs=5, batchSize=8)
 ds_train, _ = loadData(split_rate=1)
 ds_train = ds_train.prefetch(buffer_size=8)
@@ -154,11 +154,11 @@ train_model(model, ds_train, epochs=10, batchSize=8)
 # ====== Mobilenet V2 Large ====== 115, 106, 97, 89, 80, 71
 # model = create_model(base=MobileNetV2, layer_index=80, scale=16, lr=0.001)
 # train_model(model, ds_train, epochs=2, batchSize=32)
-# model = insert_upConv(model, layer_index=53, scale=8, lr=0.001)
+# model = insert_upsampling(model, layer_index=53, scale=8, lr=0.001)
 # train_model(model, ds_train, epochs=3, batchSize=32)
-# model = insert_upConv(model, layer_index=26, scale=4, lr=0.001)
+# model = insert_upsampling(model, layer_index=26, scale=4, lr=0.001)
 # train_model(model, ds_train, epochs=3, batchSize=32)
-# model = insert_upConv(model, layer_index=8, scale=2, lr=0.001)
+# model = insert_upsampling(model, layer_index=8, scale=2, lr=0.001)
 # train_model(model, ds_train, epochs=4, batchSize=32)
 # ds_train, _ = loadData(split_rate=0.3)
 # ds_train = ds_train.prefetch(buffer_size=32)
