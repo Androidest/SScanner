@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components'
 import * as tf from "@tensorflow/tfjs";
 import './ResizingLayer';
+import { pad } from '@tensorflow/tfjs';
 
 
 function App() {
@@ -23,20 +24,21 @@ function App() {
   useEffect(()=>{
     tf.ready()
     .then(async ()=>{
-      const tfmodel = await tf.loadLayersModel(process.env.PUBLIC_URL + "/edge_detector_MobileNetV2/model.json")
-
-      let img = await getImage(process.env.PUBLIC_URL + "/test.jpg")
-
+      let tfmodel = await tf.loadLayersModel(process.env.PUBLIC_URL + "/edge_detector_MobileNetV2_0_final/model.json");
+      let img = await getImage(process.env.PUBLIC_URL + "/test.jpg");
       const w= 1080, h = 486;
-      img = img.resizeBilinear([h, w])
-      img = img.reshape([1, h, w, 3]).div(127.5).sub(1)
-      img = tfmodel.predict(img)
-      img = img.greater(0).mul(1.0)
-      // img = tf.sigmoid(img)
-      img = img.reshape([h, w, 1])
-      tf.browser.toPixels(img, canvas.current)
 
-      setModel(tfmodel)
+      console.time("1");
+      img = img.resizeNearestNeighbor([h, w]);
+      img = img.reshape([1, h, w, 3]).div(127.5).sub(1);
+      img = tfmodel.predict(img);
+      img = img.greater(0).mul(1.0);
+      img = img.reshape([h, w, 1]);
+      tf.browser.toPixels(img, canvas.current);
+      console.timeEnd("1");
+      
+
+      setModel(tfmodel);
       // setResult(img)
     })
   }, [])
@@ -44,7 +46,7 @@ function App() {
 
   return (
     <AppContainer>
-      <Img src={process.env.PUBLIC_URL + "/test.jpg"} />
+      <Img src={process.env.PUBLIC_URL + "/test1.jpg"} />
       <Canvas ref={canvas} />
     </AppContainer>
   );

@@ -184,17 +184,28 @@ import tensorflow as tf
 import tensorflowjs as tfjs
 import numpy as np
 import matplotlib.pyplot as plt
+import cv2
 
 def predict_test(model, filename, maxSize=1080):
     image = tf.image.decode_jpeg(tf.io.read_file(filename), channels=3)
     image = tf.image.resize(image, (maxSize, maxSize), preserve_aspect_ratio=True)
-    image = tf.cast(tf.reshape(image,(1)+image.shape), tf.float32) / 127.5 - 1
-    p = model.predict(image)[0, :, :, 0]
-    resultImg = (p>0) * 255
+    input = tf.cast(tf.reshape(image,(1)+image.shape), tf.float32) / 127.5 - 1
+    p = model.predict(input)[0, :, :, 0]
+    resultImg = (p>0)  * 255
     plt.figure(figsize = (10,10))
     plt.imshow(resultImg, cmap='gray')
 
-filePath = './Models/edge_detector_MobileNetV2'
+    bit = np.uint8(resultImg)
+    lines = cv2.HoughLinesP(bit, 1, np.pi/150, 200, None, 320, 15)
+    image = np.uint8(image.numpy())
+    if lines is not None:
+        for l in lines:
+            l = l[0]
+            cv2.line(image, (l[0], l[1]), (l[2], l[3]), (0,0,255), 1, cv2.LINE_AA)
+    plt.imshow(image)
+
+
+filePath = './Models/edge_detector_MobileNetV2_0_final'
 model = tf.keras.models.load_model(filePath+'.h5')
-tfjs.converters.save_keras_model(model, filePath+"/")
+# tfjs.converters.save_keras_model(model, filePath+"/")
 predict_test(model, "./raw_dataset/test.jpg", maxSize=1080)
