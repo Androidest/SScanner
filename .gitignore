@@ -8,5 +8,7 @@
 
 # production
 /build
-**/bg_videos
-**/dataset
+**/bg_videos/*.mp4
+**/dataset/x/*
+**/dataset/y/*
+# **/raw_dataset/backgrounds/*.jpg
