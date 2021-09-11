@@ -4,8 +4,8 @@ import * as tf from '@tensorflow/tfjs';
 export class Resizing extends tf.layers.Layer {
     constructor() {
         super({});
-        this.target_width = 1080
-        this.target_height = 486
+        this.target_width = 800
+        this.target_height = 360
     }
 
     computeOutputShape(inputShape) {
