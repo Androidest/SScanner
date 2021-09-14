@@ -135,11 +135,11 @@ export default function Detector({model}) {
 			img = cv.matFromArray(h, w, cv.CV_8UC1, data);  // For Testing
 			cv.HoughLinesP(img, lineSeg, 1, Math.PI/180, 140, 150, 50);
 
-            // for (let i = 0; i < lineSeg.rows; ++i) {
-            //     let p1 = new cv.Point(lineSeg.data32S[i * 4], lineSeg.data32S[i * 4 + 1]);
-            //     let p2 = new cv.Point(lineSeg.data32S[i * 4 + 2], lineSeg.data32S[i * 4 + 3]);
-            //     cv.line(cvImage, p1, p2, [255,0,0,255])
-            // }
+            for (let i = 0; i < lineSeg.rows; ++i) {
+                let p1 = new cv.Point(lineSeg.data32S[i * 4], lineSeg.data32S[i * 4 + 1]);
+                let p2 = new cv.Point(lineSeg.data32S[i * 4 + 2], lineSeg.data32S[i * 4 + 3]);
+                cv.line(cvImage, p1, p2, [255,0,0,255])
+            }
 
             const lines = concatLineSegments(cv, lineSeg);
             
@@ -165,9 +165,9 @@ export default function Detector({model}) {
 
 	return (
 		<>
-			<Img src={process.env.PUBLIC_URL + "/test.jpg"} onLoad={predict} /> 
-			<Canvas ref = { canvas }/> 
+			<Img src={process.env.PUBLIC_URL + "/test2.jpg"} onLoad={predict} /> 
 			<Canvas ref = { canvas2 }/> 
+			<Canvas ref = { canvas }/> 
 		</>
 	)
 }
